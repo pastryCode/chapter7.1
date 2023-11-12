@@ -1,22 +1,21 @@
 package com.example.chapter71;
 
 import androidx.appcompat.app.AppCompatActivity;
-import android.database.Cursor;
+
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
-import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
     private MediaPlayer player;
     private boolean isPause = false;
-    private String musicPath;
     private TextView hint;
 
     @Override
@@ -31,16 +30,33 @@ public class MainActivity extends AppCompatActivity {
         hint = (TextView) findViewById(R.id.hint);
         player = new MediaPlayer();
         player.setOnCompletionListener(mediaPlayer -> setPlay());
-//
-//        File file = new File("/sdcard/000.mp3");
-//        String[] strings = {
-//                MediaStore.Audio.Media.TITLE,
-//                MediaStore.Audio.Media.ARTIST,
-//                MediaStore.Audio.Media.DATA
-//        };
-//        Cursor cursor = this.getContentResolver().query(Uri.fromFile(file),strings,null,null,null);
-//        cursor.moveToNext();
-//        musicPath = cursor.getString(2);
+
+
+        /**********************调整音量*****************************************************/
+        final AudioManager am = (AudioManager) MainActivity.this.getSystemService(Context.AUDIO_SERVICE);
+        MainActivity.this.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        SeekBar seekbar = (SeekBar)findViewById(R.id.seekBar1);
+        seekbar.setMax(am.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        int progress  = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+        seekbar.setProgress(progress);
+
+        final TextView tv = (TextView) findViewById(R.id.volume);
+        tv.setText("Volume:"+progress);
+        seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                tv.setText("Volume:"+progress);
+                am.setStreamVolume(AudioManager.STREAM_MUSIC,progress,AudioManager.FLAG_PLAY_SOUND);
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        /************************************************************************/
 
 
 
